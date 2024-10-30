@@ -24,13 +24,11 @@ def transcribe_youtube_video(video_url, ws_model):
 
     transcription = model.transcribe("audio.mp3", task="translate", language='en') 
 
-    # Save the transcription to a text file
-    with open("transcription.txt", "w", encoding="utf-8") as file:
-        file.write(transcription["text"])
-
     print("Transcription completed and saved to transcription.txt")
+    return transcription["text"]
 
-if __name__ == "__main__":
-    video_url = 'https://www.youtube.com/watch?v=YkATEgnX51k'
-    transcribe_youtube_video(video_url, "medium")
+
+# if __name__ == "__main__":
+#     video_url = 'https://www.youtube.com/watch?v=YkATEgnX51k'
+#     transcribe_youtube_video(video_url, "medium")
 

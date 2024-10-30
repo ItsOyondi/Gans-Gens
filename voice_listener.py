@@ -21,7 +21,6 @@ def get_speeach():
             text = recognizer.recognize_google(audio)
             return text
         except sr.UnknownValueError:
-            # If the speech was not understood
             print("Sorry, I could not understand the audio.")
         except sr.RequestError as e:
             # If there's an error in the API request
@@ -34,6 +33,7 @@ def record_audio(duration=5, fs=44100):
     sd.wait()  # Wait until recording is finished
     audio = np.squeeze(audio)
     wavio.write("output.wav", audio, fs, sampwidth=2)
+    print("Recording finished.")
     return "output.wav"
 
 def get_recorded(file_path):

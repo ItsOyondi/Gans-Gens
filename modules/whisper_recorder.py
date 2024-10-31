@@ -9,7 +9,7 @@ CHANNELS = 1  # Mono channel
 RATE = 16000  # Sample rate for Whisper compatibility
 CHUNK = 1024  # Buffer size
 RECORD_SECONDS = 5  # Duration of recording
-OUTPUT_FILENAME = "recorded_audio.wav"
+OUTPUT_FILENAME = "outputs/recorded_audio.wav"
 
 # Function to record audio
 def record_audio():

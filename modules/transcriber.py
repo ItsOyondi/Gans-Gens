@@ -1,14 +1,16 @@
 from __future__ import unicode_literals
 import yt_dlp as youtube_dl
 import whisper
-
+import os
 
 def transcribe_youtube_video(video_url, ws_model):
+    # Ensure the outputs directory exists
+    os.makedirs("outputs", exist_ok=True)
 
     # Define the download options
     ydl_opts = {
         'format': 'bestaudio/best',  
-        'outtmpl': 'audio.%(ext)s',  
+        'outtmpl': 'outputs/audio.%(ext)s',  # Save audio to outputs folder
         'postprocessors': [{ 
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
@@ -19,13 +21,15 @@ def transcribe_youtube_video(video_url, ws_model):
         ydl.download([video_url])
 
     # Load the Whisper model
-    model = whisper.load_model(ws_model)  # Use "base" or "small" for faster performance, or "large" for accuracy
+    model = whisper.load_model(ws_model) 
     options = whisper.DecodingOptions(fp16=False)
 
-    transcription = model.transcribe("audio.mp3", task="translate", language='en') 
+    # Transcribe audio
+    transcription = model.transcribe("outputs/audio.mp3", task="translate", language='en') 
 
     print("Transcription completed and saved to transcription.txt")
     return transcription["text"]
+
 
 
 # if __name__ == "__main__":

@@ -1,10 +1,10 @@
-import voice_listener as listener
-import transcriber as transcriber
-import whisper_recorder as ws
+from modules import voice_listener as listener
+from modules import transcriber as transcriber
+from modules import whisper_recorder as ws
 import whisper
-import embedding as embed
+from modules import embedding as embed
 import os
-import text_2_speech as tts
+from modules import text_2_speech as tts
 #Implement a pipeline for processing voices, get text, upsert to index db, fine-tune model, ouput results
 def main(model_name, video_url):
     all_text = ""
@@ -29,11 +29,11 @@ def main(model_name, video_url):
     print(yt_data, "\n")
 
     # Save all collected text into a single file
-    with open("transcription.txt", "w", encoding="utf-8") as file:
+    with open("outputs/transcription.txt", "w", encoding="utf-8") as file:
         file.write(all_text)
 
     #The text saved will be used for embedding and building RAG in gpt model
-    tts.text_to_audio(all_text)
+    tts.text_to_audio(all_text, "outputs/converted_audio.mp3")
 
 if __name__ == "__main__":
     video_url = 'https://www.youtube.com/watch?v=zyLkUFn0-xw'

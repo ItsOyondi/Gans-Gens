@@ -32,7 +32,7 @@ def record_audio(duration=5, fs=44100):
     audio = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype='int16')
     sd.wait()  # Wait until recording is finished
     audio = np.squeeze(audio)
-    wavio.write("output.wav", audio, fs, sampwidth=2)
+    wavio.write("outputs/output.wav", audio, fs, sampwidth=2)
     print("Recording finished.")
     return "output.wav"
 

@@ -6,7 +6,7 @@ import yt_dlp
 import tkinter as tk
 from tkinter import messagebox
 import requests
-import py7zr
+import zipfile
 
 def check_ffmpeg():
     try:
@@ -18,9 +18,8 @@ def check_ffmpeg():
 
 def install_ffmpeg():
     # Define FFmpeg download URL and paths
-    ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z"
-    ffmpeg_zip = "ffmpeg.7z"
-    extract_dir = "ffmpeg"
+    ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z"
+    ffmpeg_zip = "ffmpeg.zip"
     install_dir = r"C:\ffmpeg"  # Destination for FFmpeg installation
 
     try:
@@ -29,20 +28,17 @@ def install_ffmpeg():
         with open(ffmpeg_zip, "wb") as f:
             f.write(response.content)
 
-        # Extract the FFmpeg files
-        with py7zr.SevenZipFile(ffmpeg_zip, mode='r') as z:
-            z.extractall(extract_dir)
+        # Extract the FFmpeg files using zipfile
+        with zipfile.ZipFile(ffmpeg_zip, 'r') as z:
+            z.extractall(install_dir)
 
         # Remove the downloaded zip file
         os.remove(ffmpeg_zip)
 
-        # Copy the extracted files to C:\ffmpeg
-        if os.path.exists(install_dir):
-            shutil.rmtree(install_dir)  # Remove existing FFmpeg folder if it exists
-        shutil.copytree(os.path.join(extract_dir, "ffmpeg-*-win64-static", "bin"), os.path.join(install_dir, "bin"))
-
-        # Set environment variable for FFmpeg
+        # Set the path to the FFmpeg bin folder
         ffmpeg_bin_path = os.path.join(install_dir, "bin")
+        
+        # Add the FFmpeg bin folder to PATH temporarily for this session
         current_path = os.environ.get("PATH", "")
         if ffmpeg_bin_path not in current_path:
             os.environ["PATH"] += os.pathsep + ffmpeg_bin_path

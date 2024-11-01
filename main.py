@@ -36,7 +36,7 @@ def main(model_name, video_url):
     tts.text_to_audio(all_text, "outputs/converted_audio.mp3")
 
 if __name__ == "__main__":
-    video_url = 'https://www.youtube.com/watch?v=zyLkUFn0-xw'
+    video_url = 'https://www.youtube.com/watch?v=TkHcpSyzzsA'
     model_name = "base"
     main(model_name, video_url)
 

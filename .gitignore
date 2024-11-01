@@ -6,3 +6,4 @@ hello.mp3
 output.mp3
 modules/build
 modules/any-downloader.py
+modules/ffmpeg.exe

@@ -5,7 +5,7 @@ a = Analysis(
     ['any-downloader.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('ffmpeg.exe', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

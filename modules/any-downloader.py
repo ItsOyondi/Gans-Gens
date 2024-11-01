@@ -1,9 +1,12 @@
 import os
 import sys
+import shutil
 import subprocess
 import yt_dlp
 import tkinter as tk
 from tkinter import messagebox
+import requests
+import py7zr
 
 def check_ffmpeg():
     try:
@@ -14,30 +17,42 @@ def check_ffmpeg():
         return False
 
 def install_ffmpeg():
-    # Download and install FFmpeg for Windows
+    # Define FFmpeg download URL and paths
     ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z"
     ffmpeg_zip = "ffmpeg.7z"
-    
+    extract_dir = "ffmpeg"
+    install_dir = r"C:\ffmpeg"  # Destination for FFmpeg installation
+
     try:
         # Download FFmpeg
-        import requests
         response = requests.get(ffmpeg_url)
         with open(ffmpeg_zip, "wb") as f:
             f.write(response.content)
 
-        # Extract the FFmpeg files (requires py7zr)
-        import py7zr
+        # Extract the FFmpeg files
         with py7zr.SevenZipFile(ffmpeg_zip, mode='r') as z:
-            z.extractall("ffmpeg")
+            z.extractall(extract_dir)
 
-        # Clean up the downloaded zip file
+        # Remove the downloaded zip file
         os.remove(ffmpeg_zip)
 
-        # Set the path to the extracted ffmpeg folder
-        ffmpeg_extracted_path = os.path.join(os.getcwd(), "ffmpeg", "bin")
+        # Copy the extracted files to C:\ffmpeg
+        if os.path.exists(install_dir):
+            shutil.rmtree(install_dir)  # Remove existing FFmpeg folder if it exists
+        shutil.copytree(os.path.join(extract_dir, "ffmpeg-*-win64-static", "bin"), os.path.join(install_dir, "bin"))
 
-        # Add the FFmpeg bin folder to PATH temporarily for this session
-        os.environ["PATH"] += os.pathsep + ffmpeg_extracted_path
+        # Set environment variable for FFmpeg
+        ffmpeg_bin_path = os.path.join(install_dir, "bin")
+        current_path = os.environ.get("PATH", "")
+        if ffmpeg_bin_path not in current_path:
+            os.environ["PATH"] += os.pathsep + ffmpeg_bin_path
+            
+            # Optionally, add to the system PATH permanently
+            # Requires admin rights
+            import winreg as reg
+            reg_path = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+            with reg.OpenKey(reg.HKEY_LOCAL_MACHINE, reg_path, 0, reg.KEY_SET_VALUE) as key:
+                reg.SetValueEx(key, "Path", 0, reg.REG_EXPAND_SZ, current_path + os.pathsep + ffmpeg_bin_path)
 
         return True
     except Exception as e:

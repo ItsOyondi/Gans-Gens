@@ -17,6 +17,30 @@ def check_ffmpeg():
     except Exception:
         return False
 
+def install_7zip():
+    """Download and install 7-Zip if not already installed."""
+    seven_zip_url = "https://www.7-zip.org/a/7z2408-x64.exe"  # Update to latest 7-Zip URL if necessary
+    seven_zip_installer = "7z_setup.exe"
+
+    try:
+        # Download the 7-Zip installer
+        response = requests.get(seven_zip_url, stream=True)
+        response.raise_for_status()
+        with open(seven_zip_installer, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+        # Run the 7-Zip installer silently
+        subprocess.run([seven_zip_installer, "/S"], check=True)
+
+        # Remove the installer after installation
+        os.remove(seven_zip_installer)
+        
+        return True
+    except Exception as e:
+        messagebox.showerror("Installation Error", f"Failed to install 7-Zip: {e}")
+        return False
+
 def install_ffmpeg():
     # Define FFmpeg download URL and paths
     ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z"
@@ -31,13 +55,14 @@ def install_ffmpeg():
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
 
+        # Check if 7z is available, if not, install it
+        if not shutil.which("7z"):
+            if not install_7zip():
+                return False  # Stop if 7-Zip installation fails
+
         # Extract the FFmpeg files using 7z command
         temp_dir = tempfile.mkdtemp()
-        if shutil.which("7z"):  # Check if 7z command is available
-            subprocess.run(["7z", "x", ffmpeg_archive, "-o" + temp_dir], check=True)
-        else:
-            messagebox.showerror("Installation Error", "7-Zip is required to extract the FFmpeg archive.")
-            return False
+        subprocess.run(["7z", "x", ffmpeg_archive, f"-o{temp_dir}"], check=True)
 
         # Move extracted files to the install directory
         shutil.move(temp_dir, install_dir)

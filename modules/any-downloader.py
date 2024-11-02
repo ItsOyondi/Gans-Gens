@@ -20,26 +20,30 @@ def check_ffmpeg():
 def install_7zip():
     """Download and set up portable 7-Zip if not already available."""
     seven_zip_url = "https://www.7-zip.org/a/7z2408-extra.7z"  # Portable version URL
-    seven_zip_zip = "7z_portable.zip"
+    seven_zip_archive = "7z_portable.7z"
     temp_dir = tempfile.mkdtemp()
     seven_zip_dir = os.path.join(temp_dir, "7zip")
 
     try:
-        # Download the portable 7-Zip zip archive
+        # Download the portable 7-Zip archive
         response = requests.get(seven_zip_url, stream=True)
         response.raise_for_status()
-        with open(seven_zip_zip, "wb") as f:
+        with open(seven_zip_archive, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
 
-        # Extract the 7-Zip files to the temporary directory
-        shutil.unpack_archive(seven_zip_zip, seven_zip_dir)
+        # Extract the 7-Zip files using a locally available 7-Zip or a pre-installed tool
+        if shutil.which("7z"):
+            subprocess.run(["7z", "x", seven_zip_archive, f"-o{seven_zip_dir}"], check=True)
+        else:
+            messagebox.showerror("Installation Error", "Local 7-Zip extraction tool is needed for initial setup.")
+            return None
 
         # Remove the downloaded archive after extraction
-        os.remove(seven_zip_zip)
+        os.remove(seven_zip_archive)
         
-        # Return the path to the portable 7-Zip executable
-        return os.path.join(seven_zip_dir, "7z.exe")
+        # Return the path to the portable 7-Zip executable (7za.exe)
+        return os.path.join(seven_zip_dir, "7za.exe")
     except Exception as e:
         messagebox.showerror("Installation Error", f"Failed to set up 7-Zip: {e}")
         return None
@@ -58,12 +62,12 @@ def install_ffmpeg():
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
 
-        # Check if 7z is available, if not, download and set up portable 7-Zip
-        seven_zip_exe = shutil.which("7z") or install_7zip()
+        # Check if 7za is available, if not, download and set up portable 7-Zip
+        seven_zip_exe = shutil.which("7za") or install_7zip()
         if not seven_zip_exe:
             return False  # Stop if 7-Zip setup fails
 
-        # Extract the FFmpeg files using 7z command
+        # Extract the FFmpeg files using 7za command
         temp_dir = tempfile.mkdtemp()
         subprocess.run([seven_zip_exe, "x", ffmpeg_archive, f"-o{temp_dir}"], check=True)
 
@@ -92,6 +96,8 @@ def install_ffmpeg():
     except Exception as e:
         messagebox.showerror("Installation Error", f"Failed to install FFmpeg: {e}")
         return False
+
+
 def download_x_video(url, output_path):
     # Use the updated path to FFmpeg
     ydl_opts = {

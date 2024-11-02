@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import messagebox
 import requests
 import zipfile
+import tempfile
 
 def check_ffmpeg():
     try:
@@ -19,21 +20,30 @@ def check_ffmpeg():
 def install_ffmpeg():
     # Define FFmpeg download URL and paths
     ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z"
-    ffmpeg_zip = "ffmpeg.zip"
+    ffmpeg_archive = "ffmpeg.7z"
     install_dir = r"C:\ffmpeg"  # Destination for FFmpeg installation
 
     try:
         # Download FFmpeg
-        response = requests.get(ffmpeg_url)
-        with open(ffmpeg_zip, "wb") as f:
-            f.write(response.content)
+        response = requests.get(ffmpeg_url, stream=True)
+        response.raise_for_status()  # Check if the request was successful
+        with open(ffmpeg_archive, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
 
-        # Extract the FFmpeg files using zipfile
-        with zipfile.ZipFile(ffmpeg_zip, 'r') as z:
-            z.extractall(install_dir)
+        # Extract the FFmpeg files using 7z command
+        temp_dir = tempfile.mkdtemp()
+        if shutil.which("7z"):  # Check if 7z command is available
+            subprocess.run(["7z", "x", ffmpeg_archive, "-o" + temp_dir], check=True)
+        else:
+            messagebox.showerror("Installation Error", "7-Zip is required to extract the FFmpeg archive.")
+            return False
 
-        # Remove the downloaded zip file
-        os.remove(ffmpeg_zip)
+        # Move extracted files to the install directory
+        shutil.move(temp_dir, install_dir)
+
+        # Remove the downloaded archive and temporary directory
+        os.remove(ffmpeg_archive)
 
         # Set the path to the FFmpeg bin folder
         ffmpeg_bin_path = os.path.join(install_dir, "bin")

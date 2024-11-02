@@ -17,8 +17,19 @@ def check_ffmpeg():
     except Exception:
         return False
 
+def install_py7zr():
+    """Install py7zr if not already installed."""
+    try:
+        import py7zr
+    except ImportError:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "py7zr"])
+        import py7zr
+
 def install_7zip():
-    """Download and set up portable 7-Zip if not already available."""
+    """Download and set up portable 7-Zip using py7zr if not already available."""
+    install_py7zr()
+    import py7zr
+    
     seven_zip_url = "https://www.7-zip.org/a/7z2408-extra.7z"  # Portable version URL
     seven_zip_archive = "7z_portable.7z"
     temp_dir = tempfile.mkdtemp()
@@ -32,12 +43,9 @@ def install_7zip():
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
 
-        # Extract the 7-Zip files using a locally available 7-Zip or a pre-installed tool
-        if shutil.which("7z"):
-            subprocess.run(["7z", "x", seven_zip_archive, f"-o{seven_zip_dir}"], check=True)
-        else:
-            messagebox.showerror("Installation Error", "Local 7-Zip extraction tool is needed for initial setup.")
-            return None
+        # Extract the 7-Zip files using py7zr
+        with py7zr.SevenZipFile(seven_zip_archive, mode='r') as archive:
+            archive.extractall(path=seven_zip_dir)
 
         # Remove the downloaded archive after extraction
         os.remove(seven_zip_archive)

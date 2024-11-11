@@ -10,7 +10,7 @@ def transcribe_youtube_video(video_url, ws_model):
     # Define the download options
     ydl_opts = {
         'format': 'bestaudio/best',  
-        'outtmpl': 'outputs/audio.%(ext)s',  # Save audio to outputs folder
+        'outtmpl': 'outputs/audio.%(ext)s', 
         'postprocessors': [{ 
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
